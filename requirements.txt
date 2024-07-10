@@ -1,0 +1,8 @@
+asgiref
+Django
+sqlparse
+python-dotenv
+path
+psycopg2-binary
+djangorestframework
+Pillow
