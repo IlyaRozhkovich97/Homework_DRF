@@ -1,6 +1,5 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-
 from .apps import MaterialsConfig
 from .views import (CourseViewSet, LessonCreateAPIView, LessonDestroyAPIView, LessonUpdateAPIView,
                     LessonRetrieveAPIView, LessonListAPIView)

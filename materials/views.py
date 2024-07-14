@@ -1,7 +1,8 @@
 from rest_framework import viewsets, generics
-
 from materials.models import Course, Lesson
 from materials.serializers import CourseSerializer, LessonSerializer
+
+"""Course"""
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -11,6 +12,9 @@ class CourseViewSet(viewsets.ModelViewSet):
     """
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+
+
+"""Lesson"""
 
 
 class LessonCreateAPIView(generics.CreateAPIView):

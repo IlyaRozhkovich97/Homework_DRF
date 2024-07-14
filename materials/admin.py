@@ -5,7 +5,7 @@ from .models import Course, Lesson
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'owner', 'description', 'preview_image')
+    list_display = ('id', 'name', 'owner', 'description', 'preview_image')
     search_fields = ('name', 'owner__username', 'description')
     list_filter = ('owner',)
 
@@ -19,7 +19,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ('lesson_name', 'owner', 'lesson_description', 'lesson_preview_image', 'lesson_url')
+    list_display = ('id', 'lesson_name', 'owner', 'lesson_description', 'lesson_preview_image', 'lesson_url')
     search_fields = ('lesson_name', 'owner__username', 'lesson_description')
     list_filter = ('owner',)
 
