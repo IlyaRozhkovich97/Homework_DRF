@@ -1,10 +1,10 @@
 asgiref
-Django~=5.0.7
+Django
 sqlparse
-python-dotenv~=1.0.1
+python-dotenv
 path
 psycopg2-binary
-djangorestframework~=3.15.2
+djangorestframework
 Pillow
-
-django-filter~=24.2
+django-filter
+djangorestframework-simplejwt

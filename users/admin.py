@@ -5,7 +5,7 @@ from .models import User, Payment
 # Регистрация модели User
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'phone', 'avatar', 'country', 'city')
+    list_display = ('id', 'email', 'phone', 'avatar', 'country', 'city')
     search_fields = ('email', 'phone', 'country', 'city')
     list_filter = ('country', 'city')
 
