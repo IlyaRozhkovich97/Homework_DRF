@@ -1,9 +1,12 @@
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, status
 from rest_framework.permissions import IsAuthenticated
-
-from materials.models import Course, Lesson
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
+from materials.models import Course, Lesson, Subscription
+from materials.paginations import MaterialsPaginator
 from materials.serializers import CourseSerializer, LessonSerializer
-from users.permissions import IsModerator, IsOwner
+from users.permissions import IsModerator, IsOwner, IsAdminUser
 
 """Course"""
 
@@ -15,6 +18,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     """
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
+    pagination_class = MaterialsPaginator
 
     def perform_create(self, serializer):
         course = serializer.save()
@@ -23,12 +27,15 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == 'create':
-            self.permission_classes = (~IsModerator, IsAuthenticated,)
+            permission_classes = [IsAuthenticated, IsModerator]
         elif self.action == 'destroy':
-            self.permission_classes = (~IsModerator, IsOwner,)
+            permission_classes = [IsModerator | IsOwner]
         elif self.action in ['update', 'list', 'retrieve']:
-            self.permission_classes = (IsModerator | IsOwner,)
-        return super().get_permissions()
+            permission_classes = [IsModerator | IsOwner]
+        else:
+            permission_classes = []
+
+        return [permission() for permission in permission_classes]
 
 
 """Lesson"""
@@ -39,7 +46,7 @@ class LessonCreateAPIView(generics.CreateAPIView):
     Базовый класс Generic-классов, отвечающий за создание сущности.
     """
     serializer_class = LessonSerializer
-    permission_classes = (~IsModerator, IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         lesson = serializer.save()
@@ -53,7 +60,8 @@ class LessonListAPIView(generics.ListAPIView):
     """
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = (IsModerator | IsOwner)
+    permission_classes = [IsModerator | IsOwner]
+    pagination_class = MaterialsPaginator
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
@@ -62,7 +70,7 @@ class LessonRetrieveAPIView(generics.RetrieveAPIView):
     """
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = (IsModerator | IsOwner)
+    permission_classes = [IsModerator | IsOwner]
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
@@ -71,7 +79,7 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
     """
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = (IsModerator | IsOwner)
+    permission_classes = [IsModerator | IsOwner]
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
@@ -79,4 +87,26 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
     Базовый класс Generic-классов, отвечающий за удаление сущности.
     """
     queryset = Lesson.objects.all()
-    permission_classes = (~IsModerator, IsOwner)
+    permission_classes = [IsModerator | IsOwner]
+
+
+"""Subscribe"""
+
+
+class SetSubscription(APIView):
+
+    def post(self, *args, **kwargs):
+        user = self.request.user
+        course_id = self.kwargs['pk']
+        course_item = get_object_or_404(Course, id=course_id)
+
+        subs_item = Subscription.objects.filter(user=user, course=course_item)
+
+        # Если подписка у пользователя на этот курс есть - удаляем ее
+        if subs_item.exists():
+            subs_item.delete()
+            return Response({"message": "подписка удалена"}, status=status.HTTP_204_NO_CONTENT)
+        # Если подписки у пользователя на этот курс нет - создаем ее
+        else:
+            Subscription.objects.create(user=user, course=course_item)
+            return Response({"message": "подписка добавлена"}, status=status.HTTP_201_CREATED)
