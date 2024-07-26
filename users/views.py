@@ -1,10 +1,12 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework import viewsets, generics
+from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .models import Payment, User
 from .serializers import PaymentSerializer, UserSerializer
+from .services import create_stripe_product, create_stripe_price, create_stripe_session
 
 """Payment"""
 
@@ -16,6 +18,24 @@ class PaymentViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ('course', 'lesson', 'payment_method')
     ordering_fields = ('date',)
+
+
+class PaymentCreateAPIView(CreateAPIView):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+
+    def perform_create(self, serializer):
+        payment = serializer.save(user=self.request.user)
+        try:
+            product_name = payment.course.name if payment.course else payment.lesson.name
+            product = create_stripe_product(product_name)
+            price = create_stripe_price(payment.amount, product.get("id"))
+            session_id, payment_link = create_stripe_session(price)
+            payment.session_id = session_id
+            payment.link = payment_link
+            payment.save()
+        except Exception as e:
+            raise e
 
 
 """User"""

@@ -6,9 +6,7 @@ from django.shortcuts import get_object_or_404
 from materials.models import Course, Lesson, Subscription
 from materials.paginations import MaterialsPaginator
 from materials.serializers import CourseSerializer, LessonSerializer
-from users.permissions import IsModerator, IsOwner, IsAdminUser
-
-"""Course"""
+from users.permissions import IsModerator, IsOwner
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -36,9 +34,6 @@ class CourseViewSet(viewsets.ModelViewSet):
             permission_classes = []
 
         return [permission() for permission in permission_classes]
-
-
-"""Lesson"""
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
@@ -90,10 +85,10 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
     permission_classes = [IsModerator | IsOwner]
 
 
-"""Subscribe"""
-
-
 class SetSubscription(APIView):
+    """
+    Класс для управления подписками пользователя на курсы.
+    """
 
     def post(self, *args, **kwargs):
         user = self.request.user
