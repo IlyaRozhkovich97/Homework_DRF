@@ -13,6 +13,7 @@ class Course(models.Model):
     description = models.TextField(verbose_name='описание курса', null=True, blank=True)
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE, verbose_name='владелец курса', blank=True,
                               null=True)
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='обновлено')
 
     def __str__(self):
         return self.name
@@ -55,3 +56,6 @@ class Subscription(models.Model):
         verbose_name = 'подписка'
         verbose_name_plural = 'подписки'
 
+    @property
+    def user_email(self):
+        return self.user.email
