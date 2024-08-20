@@ -11,10 +11,8 @@ djangorestframework-simplejwt
 drf-yasg
 setuptools
 django-cors-headers
-stripecelery
 redis
 django-celery-beat
-
 stripe
 celery
 python-dateutil
